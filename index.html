@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Tareas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .tarea {
+      margin-bottom: 10px;
+    }
+    .boton {
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lista de Tareas</h1>
+  <form id="formularioTarea">
+    <input type="text" id="textoTarea" placeholder="Descripción de la tarea" required>
+    <input type="number" id="prioridadTarea" min="1" max="5" placeholder="Prioridad" required>
+    <button type="submit">Agregar Tarea</button>
+  </form>
+  <button onclick="ordenarPorPrioridad()">Ordenar por Prioridad</button>
+  <button onclick="ordenarPorFechaModificacion()">Ordenar por Fecha de Modificación</button>
+  <ul id="listaTareas"></ul>
+
+  <script>
+    class Tarea {
+      constructor(texto, prioridad) {
+        this.texto = texto;
+        this.prioridad = prioridad;
+        this.fechaCreacion = new Date();
+        this.fechaModificacion = new Date();
+      }
+
+      editarTarea(nuevoTexto, nuevaPrioridad) {
+        this.texto = nuevoTexto;
+        this.prioridad = nuevaPrioridad;
+        this.fechaModificacion = new Date();
+      }
+    }
+
+    const listaTareas = [];
+
+    function agregarTarea(texto, prioridad) {
+      const nuevaTarea = new Tarea(texto, prioridad);
+      listaTareas.push(nuevaTarea);
+      mostrarTareas();
+    }
+
+    function editarTarea(indice, nuevoTexto, nuevaPrioridad) {
+      listaTareas[indice].editarTarea(nuevoTexto, nuevaPrioridad);
+      mostrarTareas();
+    }
+
+    function eliminarTarea(indice) {
+      listaTareas.splice(indice, 1);
+      mostrarTareas();
+    }
+
+    function ordenarPorPrioridad() {
+      listaTareas.sort((a, b) => a.prioridad - b.prioridad);
+      mostrarTareas();
+    }
+
+    function ordenarPorFechaModificacion() {
+      listaTareas.sort((a, b) => new Date(a.fechaModificacion) - new Date(b.fechaModificacion));
+      mostrarTareas();
+    }
+
+    function mostrarTareas() {
+      const lista = document.getElementById('listaTareas');
+      lista.innerHTML = '';
+      listaTareas.forEach((tarea, indice) => {
+        const item = document.createElement('li');
+        item.className = 'tarea';
+        item.textContent = `${tarea.texto} (Prioridad: ${tarea.prioridad}, Creado: ${tarea.fechaCreacion.toLocaleString()}, Modificado: ${tarea.fechaModificacion.toLocaleString()})`;
+        const botonEditar = document.createElement('button');
+        botonEditar.textContent = 'Editar';
+        botonEditar.className = 'boton';
+        botonEditar.onclick = () => {
+          const nuevoTexto = prompt('Nuevo texto:', tarea.texto);
+          const nuevaPrioridad = prompt('Nueva prioridad (1-5):', tarea.prioridad);
+          if (nuevoTexto && nuevaPrioridad) {
+            editarTarea(indice, nuevoTexto, parseInt(nuevaPrioridad));
+          }
+        };
+        const botonEliminar = document.createElement('button');
+        botonEliminar.textContent = 'Eliminar';
+        botonEliminar.className = 'boton';
+        botonEliminar.onclick = () => eliminarTarea(indice);
+        item.appendChild(botonEditar);
+        item.appendChild(botonEliminar);
+        lista.appendChild(item);
+      });
+    }
+
+    document.getElementById('formularioTarea').onsubmit = function(event) {
+      event.preventDefault();
+      const texto = document.getElementById('textoTarea').value;
+      const prioridad = parseInt(document.getElementById('prioridadTarea').value);
+      if (texto && prioridad) {
+        agregarTarea(texto, prioridad);
+        document.getElementById('formularioTarea').reset();
+      }
+    };
+  </script>
+</body>
+</html>
